@@ -1,0 +1,15 @@
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+/sbin/mdev -s
+
+# fill up our entropy pool
+/addentropy < /addentropy
+cat /dev/urandom | head -n 2048 | /addentropy
+
+# Set up IP that qemu expects
+ifconfig eth0 10.0.2.15
+
+# Execute our `testd` inside the ubuntu chroot
+cp /testd /ubuntu/testd
+chroot /ubuntu /testd &
